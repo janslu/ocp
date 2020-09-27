@@ -15,6 +15,8 @@ import (
 	"sort"
 	"strings"
 	"sync"
+
+	"golang.org/x/net/http2"
 )
 
 const (
@@ -66,6 +68,7 @@ func get(url string) (*http.Response, error) {
 		return nil, err
 	}
 	req.Header.Set("User-Agent", userAgent)
+	client.Transport = &http2.Transport{}
 	return client.Do(req)
 }
 
@@ -81,6 +84,8 @@ func getUrlsFromSitemap(path string, follow bool) (*Urlset, error) {
 			log.Println("Downloading", path)
 		}
 		res, err = get(path)
+		log.Println("zwrot", res)
+
 		if err != nil {
 			return nil, err
 		}
@@ -300,7 +305,7 @@ func main() {
 	if err != nil {
 		fmt.Println("Error:", err)
 		if strings.HasSuffix(err.Error(), "x509: certificate signed by unknown authority") {
-			fmt.Println("\nUse the --insecure-ssl toggle to disable certificate verification") 
+			fmt.Println("\nUse the --insecure-ssl toggle to disable certificate verification")
 		}
 	} else {
 		sort.Sort(urlset)
